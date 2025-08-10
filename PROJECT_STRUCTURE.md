@@ -78,6 +78,7 @@
   - `filters.apply` → `{ query: string; tags: string[] }`
   - `insight.highlight` → `{ id: string }`
   - `nav.goto` → `{ section: "overview" | "sources" | "agents" | "insights" }`
+  - `progressive.open` → `{ source: string; cardId?: string; title?: string; metrics?: { label: string; value: string }[] }`
 - Demo: `RecommendationsCard` publishes `action.queue.push`; `ActionQueueCard` subscribes and appends.
 - TODO: swap to an event bridge with persistence + audit trail.
 
@@ -107,6 +108,7 @@
 
 ### File/Zone Checklist
 - [x] Base: `CardWidget.tsx`, `QuickAction.tsx`, `useResizeDensity.ts`, `bus.ts`
+- [ ] Progressive Disclosure: `useProgressiveDisclosure.ts`
 - [x] Top Row: `RevenuePulse.tsx`, `OpsHealth.tsx`, `RiskAlerts.tsx`, `AgentActivity.tsx`
 - [x] Left: `NavigationCard.tsx`, `FiltersCard.tsx`, `DataSourcesCard.tsx`
 - [x] Middle: `CommandCanvasCard.tsx`, `InsightStreamCard.tsx`, `ActionQueueCard.tsx`
@@ -125,11 +127,78 @@
 - Integration: `src/widgets/RevenuePulse.tsx` renders a hotspot (🤖) button, `AgentBubble`, and `FocusOverlay` with `StackCarousel` when flag is set. An absolute, non‑interactive capture layer dismisses the bubble on outside‑click without triggering the card.
 - A11y/Perf: transform/opacity animations (160–220 ms); `role="button"` on CardWidget maintained; no nested buttons; `prefers-reduced-motion` respected; blur gated via `@supports` and disabled on mobile.
 
+#### Sprint 1.5 — Quick Wins (approved)
+- Clickable tracker segments in `src/components/revx/StackCarousel.tsx` (hover/focus states; `aria-current` on active).
+- Per‑stage micro‑icons and updated copy; inline CTA in overlay header.
+- Staggered micro‑animations and easing polish; density/padding tuning and hit targets ≥ 44 px.
+
+#### Rich Placeholders — queued (behind flag)
+- Animated OCR grid; sparkline KPIs; rule‑chip micro‑flows; enhanced placeholder data. Remain behind `?revx=1`.
+
+#### Layering QA (explicit)
+- Z‑order: tooltips/menus → overlay content → overlay scrim/backdrop → AgentBubble → cards/panels → background.
+- Overlay: `FocusOverlay` uses `role="dialog" aria-modal="true"`, focus trap + restore; no interactive collisions or focus escape.
+- Validate at 360 / 768 / 1440 / 1920 and 125% zoom; include mobile Safari.
+
+#### Content Config Decision
+- Move stage copy/labels to `src/content/revx.ts` for iteration/localization.
+- Suggested shape: `export const REVX_STAGES = [{ id, label, icon, tone, copy: { xs, sm, md, lg } }]`.
+
+#### Success Criteria — Compelling Demo
+- Clear visual + narrative AI cue per stage; smooth directional transitions; no layout shift (micro 160–220 ms).
+- Clear CTA toward next action (drill/export/explore); AA contrast and keyboard path intact; console clean.
+- Perf: sustained 60 fps on mobile; Lighthouse (mobile) ≥ 85 with background enabled.
+
+#### Feature Flag & Live Readiness
+- Flag enable: `?revx=1` (presence‑only or `1`/`true` accepted; `0`/`false` disables) via `src/hooks/useFeatureFlag.ts`.
+- Live: https://riskill-zones-glass.windsurf.build/?revx=1; maintain gating until content/design are validated.
+
+---
+
+## Revenue Widget (Rotating TOC) + Floating Chat — Spec
+
+### Motion Language
+- Durations: micro 120–180 ms; panels 250–350 ms; narrative 400–600 ms.
+- Easing tokens: cubic-bezier(0.2, 0.8, 0.2, 1) for crisp UI; spring params for chat.
+- Transform-only rules (translate/scale/opacity); `prefers-reduced-motion` fallbacks.
+
+### Widget Micro-Interactions
+- Hover/press/focus: subtle scale ≤ 1.02, shadow bloom; maintain focus-visible ring.
+- Metric count-up: clamp large deltas; resolve ≤ 1.2 s; avoid long main-thread locks.
+- Stagger: 20–40 ms per child; disable on heavy DOM nodes.
+
+### Card Rotation Patterns (Table-of-Contents)
+- Desktop: wheel/arrow semantics with inertia limits and snap points.
+- Mobile: swipe thresholds (30–50 px), overscroll resistance, velocity cutoffs.
+- Directional semantics (forward/back) and a small progress affordance (dots/bar).
+
+### Floating Chat/Messenger Patterns
+- Summon/dismiss choreography: dock-origin (BR default, BL fallback); slide + fade + scale.
+- Dock positions and collision/viewport awareness; never cover critical UI.
+- Minimize → bubble with unread badge; restore with reverse animation.
+- Z-index + focus management: trap on open, ESC to close, restore focus.
+
+### Message/Card Composition
+- Typographic hierarchy: title/metric/body/aside with enterprise typography.
+- Inline media (charts, files) with responsive sizing and loading skeletons.
+- Agent persona pulse with “speaking” state.
+
+### A11y & Performance Guardrails
+- Focus order, correct ARIA roles, respect `prefers-reduced-motion`.
+- CLS-safe transitions; no layout thrash; `content-visibility` for heavy offscreen blocks.
+
+### QA Checklist & Acceptance Criteria
+- ≥60 FPS on desktop and mobile Safari/Chrome; reduced-motion disables non-essential transforms.
+- Chat overlay always above widgets; below modals unless active.
+
+### Implementation Notes
+- Hook: `src/hooks/useProgressiveDisclosure.ts` provides `escalateToChat(ctx)` which publishes a `progressive.open` event on the widget bus with context from the rotating widget.
+- Integration: evolve `src/widgets/RevenuePulse.tsx` or introduce `RevenueWidget.tsx` as rotating TOC cards; click/tap escalates to chat with context.
+
 ---
 
 ## Windsurf Boot‑Up Prompt (Pasteable)
 
-```
 Directive: This repo is doc‑driven. Before edits, re‑read README.md, PROJECT_STRUCTURE.md, WORKLOG.md. Update docs first if reality diverges.
 
 Goals:

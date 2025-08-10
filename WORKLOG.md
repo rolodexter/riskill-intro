@@ -188,3 +188,47 @@
 - Background clearly visible by default at http://localhost:5178/; console warning resolved.
 ### Next Steps
 - Commit and push; redeploy via Windsurf→Netlify and validate live.
+
+## 2025-08-09 — Sprint 1.5 plan + docs updated
+### Completed
+- Documented Sprint 1.5 Quick Wins scope (clickable tracker, micro‑icons/copy, stagger/easing, CTA, polish) across `plan.md`, `PROJECT_STRUCTURE.md`, and `README.md`.
+- Added explicit Layering QA requirements (z‑order, dialog a11y, viewport/zoom set) to docs.
+- Recorded decision to move stage copy/labels to `src/content/revx.ts` with `REVX_STAGES` shape.
+- Noted feature flag parsing hardening in `src/hooks/useFeatureFlag.ts` (presence‑only and 1/0, true/false) and added Explore Stack quick action + placeholder metric in `src/widgets/RevenuePulse.tsx`.
+### Decisions
+- Keep all revx features behind `?revx=1` until content/design validated on live; run QA gates before widening exposure.
+- Z‑order policy: tooltips/menus → overlay content → scrim/backdrop → AgentBubble → cards → background.
+### Next Steps
+- Implement Quick Wins: clickable tracker with `aria-current`, copy/icons, stagger polish, overlay CTA.
+- Create `src/content/revx.ts` and migrate strings; wire into `StackCarousel` and `AgentBubble`.
+- Validate on live: https://riskill-zones-glass.windsurf.build/?revx=1 (overlay open/close, slide nav, telemetry). Capture Lighthouse mobile ≥85.
+
+## 2025-08-10 — Sprint 1.5 Quick Wins (code)
+### Completed
+- `src/components/revx/StackCarousel.tsx`: tracker is now clickable and keyboard accessible (`role="tablist"`, `aria-current` on active). Added per‑stage micro‑icon and brief copy under title. Sourced stages from `src/content/revx.ts`.
+- `src/content/revx.ts`: new content config with `REVX_STAGES` and types (`RevxTone`, stage metadata).
+- `src/components/revx/FocusOverlay.tsx`: added optional header CTA (`ctaLabel`, `onCta`, `ctaDisabled`).
+- `src/widgets/RevenuePulse.tsx`: wired inline CTA ("Drill into revenue drivers") and emitted `revx.cta_click` telemetry; kept feature gating via `useFeatureFlag('revx')`.
+- Build passed (`npm run build`).
+- Centralized revx UI copy in `src/content/revx.ts` via `REVX_UI` and migrated labels:
+  - `src/components/revx/AgentBubble.tsx`: copy, prompt, aria label, and button text now sourced from `REVX_UI.bubble`.
+  - `src/widgets/RevenuePulse.tsx`: QuickAction label, bubble toggle aria/title, overlay title and CTA from `REVX_UI`.
+  - `src/components/revx/StackCarousel.tsx`: tracker aria label, prev/next aria, agent placeholder aria, and slide texts (Vision "OCR snippets…", Synthesis "MRR (placeholder)") now from `REVX_UI.carousel`.
+### Next Steps
+- Migrate remaining hardcoded labels into `src/content/revx.ts` (AgentBubble and any slide strings).
+- QA clickable tracker hit targets and focus rings across breakpoints; verify overlay z-order and focus trap.
+- Run local preview at http://localhost:5178/?revx=1 and validate; then commit/push and redeploy; validate live.
+
+## 2025-08-10 — Revenue Widget + Progressive Disclosure — Docs updated + Savepoint
+### Completed
+- Updated docs with full spec and bus topic:
+  - `plan.md`: added "Windsurf Task Brief — Revenue Widget + Progressive Disclosure Chat" with motion language, micro-interactions, rotation patterns, chat patterns, a11y/perf, QA.
+  - `PROJECT_STRUCTURE.md`: added spec section and `progressive.open` topic to Widget Bus; added checklist entry for `useProgressiveDisclosure.ts`.
+  - `README.md`: added condensed spec and documented `progressive.open` topic.
+- Created Save Point reboot prompt capturing current project state and next steps:
+  - `notes/savepoints/2025-08-10/savepoint-2025-08-10-revx-widget-chat.md`.
+
+### Next Steps
+- Implement rotating RevenueWidget (wheel/arrow/swipe) and floating Chat window with docked summon/minimize/restore.
+- Wire `useProgressiveDisclosure.ts` to publish `progressive.open` with card context and have chat consume.
+- QA: reduced-motion, focus trap/restore, z-index layering, 60fps feel; prepare for live validation behind `?revx=1`.

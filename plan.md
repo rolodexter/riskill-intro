@@ -51,6 +51,97 @@ Authoritative docs (absolute paths):
 ### Troubleshooting
 - Vite “Outdated Optimize Dep” (504): stop dev server; delete `riskill-cinematic/node_modules/.vite`; restart dev.
 
+## Sprint 1.5 — Quick Wins (approved)
+
+- Clickable tracker segments in `src/components/revx/StackCarousel.tsx` with hover/focus states and `aria-current` on active.
+- Per-stage micro-icons and updated copy to clarify narrative.
+- Staggered micro-animations and easing tweaks to reinforce directionality.
+- Inline CTA in overlay header (e.g., "Run Stack Explorer" or "Drill into revenue drivers").
+- Minor visual polish: padding/density tuning, focus states, and hit target checks (≥44 px).
+
+## Rich Placeholders — queued (behind flag)
+
+- OCR grid animations; sparkline KPIs; rule‑chip micro‑flows.
+- Enrich placeholder data modules; keep all content behind `?revx=1` until validated.
+
+## Layering QA (explicit)
+
+- Z‑order priorities across the app (highest to lowest): tooltips/menus → overlay content → overlay scrim/backdrop filter → AgentBubble → cards/panels → background image/gradients.
+- No nested interactive collisions; tab order remains logical; no focus escape under overlay.
+- Verify at 360 / 768 / 1440 / 1920 and at 125% zoom; include mobile Safari checks.
+- `FocusOverlay` uses `role="dialog" aria-modal="true"` with focus trap and focus restore; no stacking‑context regressions.
+
+## Content Config Decision
+
+- Move stage copy/labels to `src/content/revx.ts` for faster iteration and future localization.
+- Suggested shape:
+  - `export const REVX_STAGES = [{ id, label, icon, tone, copy: { xs, sm, md, lg } }]`.
+
+## Success Criteria — Compelling Demo
+
+- Each stage presents a clear visual and narrative AI cue.
+- Smooth directional transitions; no jank or layout shift; micro 160–220 ms.
+- Clear CTA toward next action (drill/export/explore stack).
+- Performance: sustained 60 fps on mobile; Lighthouse (mobile) ≥ 85 with background enabled.
+- Accessibility: keyboard path, focus rings, `aria-*` complete; console clean.
+
+## Feature Flag & Live Build Status
+
+- Feature flag: `?revx=1` enables; presence‑only and `1`/`true` accepted; `0`/`false` disables. Parsing handled in `src/hooks/useFeatureFlag.ts`.
+  - Live deploy: https://riskill-zones-glass.windsurf.build/?revx=1 (gated behind URL flag).
+  - Status: Sprint 1 scaffolding deployed; Quick Wins in progress; validate AgentBubble + overlay open/close, slide navigation, and telemetry on live.
+
+## Windsurf Task Brief — Revenue Widget + Progressive Disclosure Chat
+
+### Task Overview
+- Elevate `RevenuePulse` into a rotating, top-level table of contents for revenue insights (desktop + mobile).
+- On tap/click “see more,” escalate context into an elegant floating chat/messenger window.
+
+### Implementation Goals
+- Revenue Widget (rotating cards):
+  - Desktop: wheel/arrow keys rotate; 300–400 ms ease-out; consistent spacing to simulate continuous stack.
+  - Mobile: swipe gestures (L/R) with thresholds and snap points.
+  - Each card: 2–3 key metrics, short headline, small viz; click/tap escalates to chat.
+- Floating Chat/Messenger:
+  - Slide + fade + scale from dock (BR default, BL fallback). Glassmorphic, rounded, z-index above panels.
+  - Rich content (text, charts, files); persists context; minimizes to bubble with unread badge.
+- Progressive Disclosure Logic:
+  - Shared hook `useProgressiveDisclosure.ts` publishes `progressive.open` with widget context for chat to consume.
+
+### Motion Language
+- Durations: micro 120–180 ms; panels 250–350 ms; narrative 400–600 ms.
+- Easing: cubic-bezier(0.2, 0.8, 0.2, 1) for crisp UI; springs for conversational chat.
+- Transform-only (translate/scale/opacity). Respect `prefers-reduced-motion`.
+
+### Widget Micro-Interactions
+- Hover/press/focus: subtle scale ≤1.02 and shadow bloom.
+- Metric count-up: clamp large deltas; resolve ≤1.2 s; frame-budget friendly.
+- Stagger: 20–40 ms per child; disable for heavy DOM.
+
+### Card Rotation Patterns
+- Desktop: wheel/arrow semantics; inertia limits; snap after each card.
+- Mobile: swipe 30–50 px threshold; overscroll resistance; velocity cutoffs.
+- Direction semantics (forward/back) and progress affordance (dots/bar).
+
+### Floating Chat Patterns
+- Summon/dismiss: dock-origin slide+fade+scale; minimize → bubble with unread; restore reverses.
+- Dock positions: BR/BL with collision/viewport awareness.
+- Z-index + focus: trap on open, ESC to close, restore focus.
+
+### Message/Card Composition
+- Typographic hierarchy: title/metric/body/aside.
+- Inline media (charts/files) with responsive sizing + skeletons.
+- Agent persona pulse + “speaking” state.
+
+### A11y & Perf Guardrails
+- Focus order, ARIA roles; `prefers-reduced-motion` respected.
+- No layout thrash; CLS-safe transitions; use `content-visibility` for heavy blocks.
+
+### QA Checklist & Acceptance
+- ≥60 FPS feel on desktop/mobile Safari/Chrome.
+- Reduced-motion disables non-essential transforms.
+- Chat overlay always above widgets; below modals unless active.
+
 ## WORKLOG template (use verbatim)
 
 ```

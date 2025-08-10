@@ -5,8 +5,11 @@ import LeftZone from "./components/landing/LeftZone";
 import MiddleCanvas from "./components/landing/MiddleCanvas";
 import RightZone from "./components/landing/RightZone";
 import Footer from "./components/landing/Footer";
+import ChatWindow from "./components/chat/ChatWindow";
+import { useFeatureFlag } from "./hooks/useFeatureFlag";
 
 export default function App(){
+  const revx = useFeatureFlag("revx");
   return (
     <div className="min-h-dvh text-textPri">
       <GradientBackdrop />
@@ -22,6 +25,7 @@ export default function App(){
         </div>
       </main>
       <Footer />
+      {revx && <ChatWindow />}
     </div>
   );
 }

@@ -4,7 +4,10 @@ export type ProgressiveContext = {
   source: string; // e.g., "revenue-widget"
   cardId?: string;
   title?: string;
+  primary?: string;
   metrics?: Array<{ label: string; value: string }>;
+  anchorRect?: { top: number; left: number; right: number; bottom: number; width: number; height: number };
+  narrative?: string;
 };
 
 /**

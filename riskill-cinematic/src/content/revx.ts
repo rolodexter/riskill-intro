@@ -9,6 +9,7 @@ export type RevxStage = {
   tone: RevxTone;
   // Simple micro-icon identifier; UI chooses which inline SVG to render
   icon: "layers" | "chip" | "eye" | "logic" | "synthesis";
+  kpis?: Array<{ label: string; value: string }>;
   copy?: {
     xs?: string;
     sm?: string;
@@ -79,6 +80,10 @@ export const REVX_STAGES: RevxStage[] = [
     label: "Raw Inputs",
     tone: "neutral",
     icon: "layers",
+    kpis: [
+      { label: "Docs", value: "1.2k" },
+      { label: "TXNs", value: "48k" },
+    ],
     copy: {
       xs: "Raw docs and transactions",
       md: "Docs, TXNs, and sources flowing in",
@@ -89,6 +94,10 @@ export const REVX_STAGES: RevxStage[] = [
     label: "Language • LLM",
     tone: "blue",
     icon: "chip",
+    kpis: [
+      { label: "Parsed", value: "96%" },
+      { label: "Entities", value: "32k" },
+    ],
     copy: { xs: "Parsing + normalizing" },
   },
   {
@@ -96,6 +105,10 @@ export const REVX_STAGES: RevxStage[] = [
     label: "Vision",
     tone: "purple",
     icon: "eye",
+    kpis: [
+      { label: "OCR", value: "92%" },
+      { label: "Images", value: "8.4k" },
+    ],
     copy: { xs: "OCR snippets" },
   },
   {
@@ -103,6 +116,10 @@ export const REVX_STAGES: RevxStage[] = [
     label: "Symbolic Logic",
     tone: "amber",
     icon: "logic",
+    kpis: [
+      { label: "Checks", value: "742" },
+      { label: "Flags", value: "12" },
+    ],
     copy: { xs: "Rules + checks" },
   },
   {
@@ -110,6 +127,10 @@ export const REVX_STAGES: RevxStage[] = [
     label: "Synthesis",
     tone: "emerald",
     icon: "synthesis",
+    kpis: [
+      { label: "MRR", value: "$312k" },
+      { label: "Change", value: "+3.2%" },
+    ],
     copy: { xs: "KPIs + trends" },
   },
 ];

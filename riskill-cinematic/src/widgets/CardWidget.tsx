@@ -2,8 +2,8 @@ import type { ReactNode } from "react";
 import { motion } from "framer-motion";
 
 export type CardProps = {
-  title?: string;
-  subtitle?: string;
+  title?: ReactNode;
+  subtitle?: ReactNode;
   actions?: ReactNode;
   footer?: ReactNode;
   children?: ReactNode;
@@ -11,6 +11,9 @@ export type CardProps = {
   status?: "idle" | "loading" | "error" | "success";
   interactive?: boolean;
   onPrimaryAction?: () => void;
+  hoverLift?: boolean; // enable hover translate/scale; disable to avoid new stacking context
+  headerHeight?: number; // optional fixed header height in px; content area will fill the rest
+  keyboardActivation?: boolean; // when interactive, if false, Enter/Space won't trigger the action
 };
 
 export default function CardWidget({
@@ -23,32 +26,42 @@ export default function CardWidget({
   status = "idle",
   interactive = false,
   onPrimaryAction,
+  hoverLift = true,
+  headerHeight,
+  keyboardActivation = true,
 }: CardProps) {
   const content = (
     <div
       className={
-        "relative rounded-2xl border border-white/10 bg-white/5 md:bg-white/6 " +
-        "backdrop-blur-xs md:backdrop-blur-xl shadow-glass group " +
+        "relative overflow-hidden z-0 h-full rounded-2xl border border-white/10 bg-white/5 md:bg-white/6 " +
+        "min-h-[200px] lg:min-h-[220px] p-4 lg:p-5 " +
+        "md:backdrop-blur-xl shadow-glass group " +
         className
       }
     >
       {/* static sheen */}
-      <div className="pointer-events-none absolute inset-0 rounded-2xl bg-sheen opacity-15" />
+      <div className="pointer-events-none absolute inset-0 rounded-2xl bg-sheen opacity-15 z-0" />
 
       {(title || actions) && (
-        <div className="flex items-center justify-between px-4 py-3">
-          <div>
+        <div
+          className={`relative z-10 ${headerHeight ? "flex items-center" : "pt-1 pb-2 min-h-[44px]"}`}
+          style={headerHeight ? { height: headerHeight } : undefined}
+        >
+          <div className="pr-10">
             {title && <div className="text-sm font-medium">{title}</div>}
             {subtitle && <div className="text-xs text-textSec">{subtitle}</div>}
           </div>
-          {/* Quick actions: visible on hover/focus */}
-          <div className="opacity-0 max-[480px]:opacity-100 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-150 flex items-center gap-2 flex-wrap">
+          {/* Quick actions: absolute cluster in top-right */}
+          <div className="absolute top-2 right-2 z-30 opacity-0 max-[480px]:opacity-100 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-150 flex items-center gap-2 flex-wrap">
             {actions}
           </div>
         </div>
       )}
 
-      <div className="px-4 pb-4">
+      <div
+        className="relative z-10"
+        style={headerHeight ? { height: `calc(100% - ${headerHeight}px)` } : undefined}
+      >
         {status === "loading" ? (
           <div className="h-24 bg-white/5 rounded" />
         ) : status === "error" ? (
@@ -59,7 +72,7 @@ export default function CardWidget({
       </div>
 
       {footer && (
-        <div className="px-4 pb-4 pt-2 text-xs text-textSec/80">{footer}</div>
+        <div className="pt-2 text-xs text-textSec/80">{footer}</div>
       )}
 
       {/* focus ring indicator */}
@@ -79,12 +92,12 @@ export default function CardWidget({
         if (!onPrimaryAction) return;
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
-          onPrimaryAction();
+          if (keyboardActivation) onPrimaryAction();
         }
       }}
       className="w-full text-left rounded-2xl focus:outline-none"
       initial={false}
-      whileHover={{ y: -2, scale: 1.01 }}
+      whileHover={hoverLift ? { y: -2, scale: 1.01 } : undefined}
       whileTap={{ scale: 0.99 }}
       transition={{ duration: 0.18, ease: [0.2, 0.8, 0.2, 1] }}
     >

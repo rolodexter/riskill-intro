@@ -19,3 +19,36 @@
 - Completed: Converted layout to zones-only skeleton. Simplified `TopWidgets`, `LeftZone`, `MiddleCanvas`, `RightZone` to neutral `GlassCard` placeholders (fixed heights). Replaced footer tagline with neutral placeholder. Adjusted `App.tsx` grid to `md:grid-cols-4` with mobile stacking order Top → Middle → Left → Right.
 - Tech: Updated `GlassCard` to support empty usage (children optional), removed unused imports, marked unused props, tightened motion timings. Docs updated (`README.md`, `PROJECT_STRUCTURE.md`).
 - Next Steps: Run dev server (strict port 5178), verify responsiveness at 360/768/1440+, AA contrast, and perf on low-end devices.
+
+2025-08-10
+- Completed: Fixed Revenue TOC anchoring and prevented card growth by introducing a fixed-height content well inside the card. Shell now clamps height (`min-h-[200px] lg:min-h-[220px]`, `p-4 lg:p-5`, `overflow-hidden`). TOC track is absolutely positioned within a `relative` well (`h-[88px] sm:h-[96px] lg:h-[110px]`, `overflow-visible`) so rotation uses transform/opacity only and never reflows layout. Pagination dots anchored to the well bottom.
+- Completed: Normalized top-row widget heights via grid `items-stretch` and `CardWidget` `h-full`. Disabled card hover transforms for Revenue to avoid new stacking contexts while TOC animates.
+- Completed: Gesture guardrails — wheel handler uses non-passive listener with scrollable-ancestor guard and debounce; swipe thresholds tuned; ArrowLeft/ArrowRight rotate; Enter escalates to chat.
+- Completed: ChatWindow mobile bottom-sheet at ≤640px with ≥44px hit targets; reduced motion respected.
+- Decisions: Keep card shell `overflow-hidden` to prevent bleed across adjacent widgets; allow inner TOC well `overflow-visible` to preserve card shadow aesthetics inside the shell.
+- Next Steps: QA at 1440/1920 for equal heights; check 60fps while rotating; ensure Lighthouse + a11y remain ≥ targets.
+
+2025-08-10 (full-panel Z-stack)
+- Completed: Rebuilt Revenue widget TOC as full-panel Z-index stack. Static header strip (56px, z-10). Content well fills the rest via `height: calc(100% - 56px)`. Panels are `absolute inset-0`, identical size, and swap with depth crossfade (`opacity 0→1`, `scale 0.98→1`, 250–320ms, bezier(0.2,0.8,0.2,1)).
+- Inputs: ArrowLeft/Right; wheel only when pointer is over the well (non-passive listener, scrollable ancestor guard, debounce); swipe threshold ~36px with velocity cutoff; Enter escalates to chat via `progressive.open`.
+- A11y: Well has `role="group"` + `aria-roledescription="carousel"` and label "Revenue overview, slide X of Y". Only active panel focusable; others `aria-hidden`/`tabIndex=-1`. Live region announces slide changes. Reduced motion: crossfade only (no scale/translate).
+- Perf: Transform/opacity only; `will-change: transform, opacity`; subtle shadows per depth; removed mobile backdrop-blur in `CardWidget` to avoid GPU cost.
+- Layering: Header z-10; panels z-20; indicators/hints z-30. Widget footprint unchanged; zero CLS.
+- Docs: Updated `PROJECT_STRUCTURE.md` (widget anatomy) and `README.md` (flag + controls). Created Save Point for this cut.
+- Next Steps: Full QA desktop/mobile; verify Lighthouse and a11y; commit/push and redeploy behind `?revx=1`.
+
+2025-08-10 (revx widget chat anchor)
+- Completed: Replaced Enter key escalation with click/tap on active panel in `src/widgets/RevenuePulse.tsx`. Added hover/tap highlight and prevented Enter/Space default on the active button for clarity.
+- Completed: Passed `anchorRect` + `primary` KPI via `useProgressiveDisclosure.escalateToChat()` context. Updated `ProgressiveContext` and Chat types.
+- Completed: Anchored `ChatWindow` next to the widget using `anchorRect` with smart fallbacks (left/right/below + clamped to viewport). Mobile ≤640px uses full‑width bottom sheet. Header shows title + primary KPI. Removed placeholder body and added compact inline micro‑viz and metric tiles.
+- Completed: Enforced fixed widget footprint by switching the content well to `overflow-hidden` and keeping all card transitions inside the fixed area. Added `cursor-pointer` on active panel.
+- Docs: Updated `README.md` Revx section to reflect click/tap trigger and anchored messenger behavior.
+- QA: Verified desktop placement, mobile bottom sheet, focus trap/ESC close, reduced motion compliance, and no scaling during card rotation.
+- Next Steps: Create Save Point for this cut; commit and push; redeploy; run Lighthouse and a11y passes.
+
+2025-08-10 (KPI UX polish)
+- Completed: Tuned `RevenuePulse` Z-stack animation to keep next card behind at ~0.97 scale and ~0.85 opacity, with vertical translate offsets, subtle shadow depth, and cubic-bezier(0.2,0.8,0.2,1). Reduced motion uses crossfade only. All transitions remain inside fixed content well.
+- Completed: Extended chat escalation context with `narrative` and rendered narrative block in `src/components/chat/ChatWindow.tsx`. Header shows title + primary.
+- Fix: Removed unused `React` import from `src/components/icons/KPI.tsx` to satisfy TS build.
+- Build: `npm run build` passes (tsc + vite). Ready for QA on localhost:5178 with `?revx=1`.
+- Next Steps: Run dev server, QA widget transitions and chat narrative, then commit/push and redeploy.

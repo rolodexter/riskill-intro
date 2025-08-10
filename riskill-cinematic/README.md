@@ -39,3 +39,10 @@ Theme extensions:
 - Lightweight placeholders for demos; lazy as we add media
 - Test widths: 360px, 768px, 1440–1920px
 - Respect `prefers-reduced-motion`; only transform/opacity animations
+
+## Revx: Revenue Widget (Full‑Panel Z‑Stack)
+- Feature flag: append `?revx=1` to the URL.
+- Controls: ArrowLeft/Right; wheel only over the content well; swipe (≈36px threshold) on touch.
+- Click/tap anywhere on the active panel opens the messenger (progressive disclosure).
+- Messenger placement: anchored adjacent to the widget on desktop; full‑width bottom sheet on mobile (≤640px).
+- A11y: Well uses `role="group"` + `aria-roledescription="carousel"`; only the active panel is focusable; reduced motion uses crossfade only.

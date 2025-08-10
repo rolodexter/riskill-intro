@@ -38,12 +38,20 @@ body{background: var(--bg-grad); color: var(--color-textPri);}
 /* Background: dark nature vista with overlay gradients */
 .bg-onyx-vista{
   background:
-    radial-gradient(1200px 800px at 25% 10%, rgba(18,22,26,.85), rgba(7,8,10,.96)),
-    linear-gradient(180deg, rgba(0,0,0,.35), rgba(0,0,0,.65)),
+    radial-gradient(1200px 800px at 25% 10%, rgba(18,22,26,.55), rgba(7,8,10,.85)),
+    linear-gradient(180deg, rgba(0,0,0,.18), rgba(0,0,0,.30)),
     url('/assets/bg/nature-vista-dark.jpg') center/cover no-repeat fixed;
 }
 @media (max-width: 480px){
   .bg-onyx-vista{ background-attachment: scroll; }
+}
+
+/* Debug/validation: background image without overlays */
+.bg-onyx-vista-raw{
+  background: url('/assets/bg/nature-vista-dark.jpg') center/cover no-repeat fixed;
+}
+@media (max-width: 480px){
+  .bg-onyx-vista-raw{ background-attachment: scroll; }
 }
 
 @media (prefers-reduced-motion: reduce){

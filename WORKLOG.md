@@ -95,3 +95,21 @@
 - Optionally convert to WebP and point `src/theme/bg.ts` `BG_URL` to `nature-vista-dark.webp`.
 - Run responsive checks (360/768/1440/1920) and Lighthouse mobile ≥85 with background enabled.
 - Claim Netlify site to view logs and proceed with deployed QA gates.
+
+## 2025-08-09 — Backdrop z-index fix for background visibility
+### Completed
+- Adjusted `GradientBackdrop` container from `-z-10` to `z-0` and added `pointer-events-none` so `.bg-onyx-vista` renders above the body gradient while staying below app content.
+### Rationale
+- Negative z-index placed the fixed backdrop behind the page background, making the image imperceptible despite correct asset path.
+### Next Steps
+- Verify on http://localhost:5178 after hard refresh (disable cache). If still subtle, temporarily reduce overlay alpha in `.bg-onyx-vista` for validation, then revert.
+
+## 2025-08-09 — Background default visibility + nested button fix
+### Completed
+- Made raw background the default (`bg-onyx-vista-raw`), overlays now opt-in via `?bg=overlay` or `#bg=overlay`.
+- Softened overlay opacities in `src/index.css` to maintain legibility when overlays are enabled.
+- Fixed React warning by replacing outer `motion.button` with `motion.div` (role="button" + keyboard handlers) in `src/widgets/CardWidget.tsx` to avoid nested `<button>`.
+### Result
+- Background clearly visible by default at http://localhost:5178/; console warning resolved.
+### Next Steps
+- Commit and push; redeploy via Windsurf→Netlify and validate live.

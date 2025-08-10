@@ -1,8 +1,12 @@
 import { BG_URL } from "../../theme/bg";
 
 export default function GradientBackdrop(){
+  // Default to raw background (no darkening overlays) unless explicitly opting into overlays via bg=overlay.
+  const useOverlay = typeof window !== "undefined" && (
+    window.location.search.includes("bg=overlay") || window.location.hash.includes("bg=overlay")
+  );
   return (
-    <div aria-hidden className="fixed inset-0 -z-10 bg-onyx-vista">
+    <div aria-hidden className={`fixed inset-0 z-0 pointer-events-none ${useOverlay ? 'bg-onyx-vista' : 'bg-onyx-vista-raw'}`}>
       <img src={BG_URL} alt="" className="w-0 h-0 opacity-0" loading="eager" />
       <div
         className="absolute inset-0 mix-blend-screen pointer-events-none"

@@ -70,9 +70,18 @@ export default function CardWidget({
   if (!interactive) return content;
 
   return (
-    <motion.button
-      type="button"
+    <motion.div
+      role="button"
+      aria-label={title ? `${title} card` : "Card"}
+      tabIndex={0}
       onClick={onPrimaryAction}
+      onKeyDown={(e) => {
+        if (!onPrimaryAction) return;
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onPrimaryAction();
+        }
+      }}
       className="w-full text-left rounded-2xl focus:outline-none"
       initial={false}
       whileHover={{ y: -2, scale: 1.01 }}
@@ -80,6 +89,6 @@ export default function CardWidget({
       transition={{ duration: 0.18, ease: [0.2, 0.8, 0.2, 1] }}
     >
       {content}
-    </motion.button>
+    </motion.div>
   );
 }

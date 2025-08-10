@@ -23,7 +23,7 @@ export default function RevenuePulse() {
     emit("revx.overlay_open", { deviceClass, density: bp });
   };
   return (
-    <div ref={ref}>
+    <div ref={ref} className={bubbleOpen ? "relative z-40" : undefined}>
       <CardWidget
         title="Revenue"
         subtitle={bp === "xs" ? undefined : "Last 24h"}

@@ -45,8 +45,15 @@
 - QA per checklist: keyboard path, mobile tap+swipe, 360/768/1440/1920 visuals, no console warnings, CLS ~0.
 - After local QA, push and redeploy; validate at https://riskill-zones-glass.windsurf.build/?revx=1 and share with Joe.
 
-### Notes
-- If Vite shows "Outdated Optimize Dep" (504), stop dev server, delete `riskill-cinematic/node_modules/.vite`, and restart dev.
+## 2025-08-09 — Telemetry wiring + AgentBubble z-index fix
+### Completed
+- Wired `revx.slide_change` telemetry in `src/components/revx/StackCarousel.tsx` using `src/utils/telemetry.ts` (sampled, no PII).
+- Fixed AgentBubble stacking bug where bubble text was hidden behind Navigation: applied conditional `relative z-40` on `src/widgets/RevenuePulse.tsx` wrapper when `bubbleOpen` is true.
+### Result
+- Slide changes now emit sampled telemetry; bubble reliably overlays Navigation.
+### Next Steps
+- Redeploy and validate live at https://riskill-zones-glass.windsurf.build/?revx=1; run QA checklist (keyboard/swipe, responsiveness, a11y, console/perf).
+
 ## 2025-08-09 — Top Widgets polish + propagation fix
 ### Completed
 - Added `event.stopPropagation()` in `src/widgets/QuickAction.tsx` to prevent parent `onPrimaryAction` from firing when quick actions are clicked.

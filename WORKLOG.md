@@ -63,3 +63,24 @@
 - Add optimized `nature-vista-dark.jpg` (or WebP) to `public/assets/bg/` per guidance.
 - Run dev server, validate 360/768/1440/1920 screenshots, and capture Lighthouse mobile perf.
 - Post preview URL after compile-green; iterate on contrast/density if needed.
+
+## 2025-08-09 — GitHub Push + Windsurf Deploy Kickoff
+### Completed
+- Created root `.gitignore` to ignore node_modules/dist/logs.
+- Committed and pushed changes to `origin/main` (zones-only background, density wiring, event topics, docs, netlify.toml).
+- Created `netlify.toml` for Vite SPA build/preview and SPA redirects.
+- Initiated Windsurf deploy → Netlify with subdomain `riskill-zones-glass`.
+### Metadata
+- Windsurf Deployment ID: `a06b0cba-a9bf-4bfc-a4f9-2dc44b9b2620`.
+- Project ID: `f30c7c0e-885a-45af-a2e0-b49512827417`.
+- Pending URL: https://riskill-zones-glass.windsurf.build
+### Next Steps
+- Wait for build to complete; claim site in UI to view logs if needed.
+- After live, run QA gates on deployed build (responsive/perf/a11y/behavior).
+
+## 2025-08-09 — Savepoint Reboot Prompt
+### Completed
+- Created a comprehensive reboot prompt savepoint for rolodexterVS and Joe.
+- Path: `notes/savepoints/2025-08-09/savepoint-2025-08-09-1855.md`.
+### Next Steps
+- Commit and push savepoint to GitHub for persistence.

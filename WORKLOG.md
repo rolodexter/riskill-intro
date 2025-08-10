@@ -84,3 +84,14 @@
 - Path: `notes/savepoints/2025-08-09/savepoint-2025-08-09-1855.md`.
 ### Next Steps
 - Commit and push savepoint to GitHub for persistence.
+
+## 2025-08-09 — Background asset installed (Starry Night)
+### Completed
+- Downloaded Pexels starry night image to `riskill-cinematic/public/assets/bg/nature-vista-dark.jpg` (~122 KB, 1920×1080 via Pexels compression params).
+- Verified rendering under `.bg-onyx-vista` overlays in local preview at `http://localhost:5178`.
+### Decisions
+- Keep JPG for now for speed; consider converting to WebP once QA is green.
+### Next Steps
+- Optionally convert to WebP and point `src/theme/bg.ts` `BG_URL` to `nature-vista-dark.webp`.
+- Run responsive checks (360/768/1440/1920) and Lighthouse mobile ≥85 with background enabled.
+- Claim Netlify site to view logs and proceed with deployed QA gates.

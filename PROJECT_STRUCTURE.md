@@ -115,6 +115,16 @@
 - [x] Background image + overlay gradient applied
 - [x] Density tuning across key widgets (RevenuePulse, CommandCanvas, Recommendations)
 
+### Revenue revx (feature‑flagged) — Step 1
+- Flag: enable with `?revx=1` (handled by `src/hooks/useFeatureFlag.ts`). Without the flag, no visual/behavioral change.
+- Components (new):
+  - `src/components/revx/AgentBubble.tsx` — narrative AI bubble with “Learn more”. Tap/hover/focus to open; outside/ESC to dismiss; collision‑aware placement; density‑aware copy.
+  - `src/components/revx/FocusOverlay.tsx` — portal modal with scroll lock, `aria-hidden`/`inert` on background, focus trap, ESC, focus‑restore. Blur disabled on mobile; opacity dim fallback.
+  - `src/components/revx/StackCarousel.tsx` — 4 placeholder slides (Raw Inputs, Model Actions, Agent Orchestration, Synthesized Insight). Arrow keys + swipe; progress bars.
+  - `src/utils/telemetry.ts` — sampled console telemetry: `revx.bubble_open`, `revx.learn_more`, `revx.overlay_open`, `revx.slide_change`, `revx.overlay_close`.
+- Integration: `src/widgets/RevenuePulse.tsx` renders a hotspot (🤖) button, `AgentBubble`, and `FocusOverlay` with `StackCarousel` when flag is set. An absolute, non‑interactive capture layer dismisses the bubble on outside‑click without triggering the card.
+- A11y/Perf: transform/opacity animations (160–220 ms); `role="button"` on CardWidget maintained; no nested buttons; `prefers-reduced-motion` respected; blur gated via `@supports` and disabled on mobile.
+
 ---
 
 ## Windsurf Boot‑Up Prompt (Pasteable)

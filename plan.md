@@ -26,6 +26,31 @@ Authoritative docs (absolute paths):
 - WORKLOG.md
   - Chronological entries using the template below.
 
+## Current Execution Plan — Revenue revx Step 1
+
+- Scope: Implement feature-flagged AgentBubble → Learn more → FocusOverlay (portal) → StackCarousel (placeholder slides) in `RevenuePulse.tsx`.
+- Flag: `?revx=1` (handled by `src/hooks/useFeatureFlag.ts`).
+- New components:
+  - `src/components/revx/AgentBubble.tsx` — narrative bubble; tap/hover/focus open; outside/ESC dismiss; collision-aware placement; density-aware copy.
+  - `src/components/revx/FocusOverlay.tsx` — portal modal; scroll lock; background inert; focus trap; ESC; focus restore; blur gated via `@supports`.
+  - `src/components/revx/StackCarousel.tsx` — 4 placeholder slides; arrows + swipe; slide indicators.
+  - `src/utils/telemetry.ts` — sampled console telemetry for revx events.
+- Integration: `src/widgets/RevenuePulse.tsx` adds hotspot, bubble, overlay, telemetry, and outside-click layer that does not trigger card action.
+
+### Acceptance Criteria (Step 1)
+1) No console warnings (hydration, nested interactive, a11y roles).
+2) A11y: Card remains `role="button"`; bubble reachable via Tab; dismiss via ESC/outside; overlay `role="dialog" aria-modal="true"` with focus trap and focus restore.
+3) Perf: transform/opacity-only; micro 160–220 ms; no layout shift; mobile steady 60fps.
+4) Responsive: 360/768/1440/1920 clean; bubble doesn’t clip; carousel fits; hit targets ≥44 px; tap + swipe work; arrows on desktop.
+5) Feature flag: No behavior/layout change without `?revx=1`.
+
+### Instrumentation (sampled)
+- Events: `revx.bubble_open`, `revx.learn_more`, `revx.overlay_open`, `revx.slide_change`, `revx.overlay_close`.
+- Payload: `{ deviceClass, density, slideIndex? }`.
+
+### Troubleshooting
+- Vite “Outdated Optimize Dep” (504): stop dev server; delete `riskill-cinematic/node_modules/.vite`; restart dev.
+
 ## WORKLOG template (use verbatim)
 
 ```

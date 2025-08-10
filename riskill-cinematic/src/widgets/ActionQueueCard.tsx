@@ -6,7 +6,20 @@ type Item = { id: string; type: string; ts: number };
 
 export default function ActionQueueCard() {
   const [items, setItems] = useState<Item[]>([]);
-  useEffect(() => sub("action.queue.push", (it: Item) => setItems((p) => [it, ...p])), []);
+  useEffect(() =>
+    sub("action.queue.push", (payload: unknown) => {
+      if (
+        payload &&
+        typeof payload === "object" &&
+        "id" in payload &&
+        "type" in payload &&
+        "ts" in payload
+      ) {
+        const it = payload as Item;
+        setItems((p) => [it, ...p]);
+      }
+    }),
+  []);
 
   return (
     <CardWidget title="Action Queue" subtitle="Triggered by widgets">

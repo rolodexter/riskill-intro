@@ -42,7 +42,7 @@ export default function CardWidget({
             {subtitle && <div className="text-xs text-textSec">{subtitle}</div>}
           </div>
           {/* Quick actions: visible on hover/focus */}
-          <div className="opacity-0 max-[480px]:opacity-100 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-150 flex gap-1">
+          <div className="opacity-0 max-[480px]:opacity-100 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-150 flex items-center gap-2 flex-wrap">
             {actions}
           </div>
         </div>

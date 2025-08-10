@@ -1,7 +1,7 @@
-type Fn = (p: any) => void;
+type Fn = (p: unknown) => void;
 const map = new Map<string, Set<Fn>>();
 
-export function pub(topic: string, payload: any) {
+export function pub(topic: string, payload: unknown) {
   if (!map.has(topic)) return;
   for (const fn of map.get(topic)!) fn(payload);
 }

@@ -56,6 +56,7 @@ Preview: http://localhost:5178
 - Port conflict: ensure nothing else is bound to 5178; re-run with `--strictPort`.
 
 ## Recent Updates
+- 2025-08-09: Pushed to GitHub and initiated Windsurf/Netlify deploy → https://riskill-zones-glass.windsurf.build (pending build).
 - 2025-08-09: Implemented dark nature vista background + overlays; wired actionable density into RevenuePulse, CommandCanvas, and Recommendations; stabilized event topics; added assets placeholder and updated docs.
 - 2025-08-09: Switched to zones-only CardWidget micro-app layout; implemented CardWidget contract, widget bus, and all widgets; wired zones; fixed TS and bus cleanup; added doc-driven workflow and plan.md; ready for preview.
 - 2025-08-08: Initialized clean-room Vite app; locked dev server to localhost:5178; added motion/layout scaffolding; baseline onboarding copy in `App.tsx`.

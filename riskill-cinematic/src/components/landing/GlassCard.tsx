@@ -7,7 +7,7 @@ interface GlassCardProps {
   elevation?: "normal" | "high"; // kept for compatibility
 }
 
-export default function GlassCard({ children, className = "", elevation: _elevation = "normal" }: GlassCardProps) {
+export default function GlassCard({ children, className = "" }: GlassCardProps) {
   // elevation prop retained but minimal visual difference to keep skeleton simple
   const borderClass = "border border-white/10";
   return (

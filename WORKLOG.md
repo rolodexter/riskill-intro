@@ -1,4 +1,72 @@
 # WORKLOG — Riskill Cinematic
+## 2025-08-09 — Stack Explorer Sprint 1 — UI/UX skeleton
+### Completed
+- Implemented segmented progress tracker (5 steps) with subtle glow/scale on active in `src/components/revx/StackCarousel.tsx`.
+- Added directional slide transitions (left/right) via Framer Motion with fade and ease; preserves arrow keys + swipe.
+- Introduced agent pulse avatar (idle breathing glow) anchored in overlay corner; color-coded per stage (blue/purple/amber/emerald).
+- Built placeholder modules: anonymized transactions list, JSON snippet scroller, OCR tile, and animated number ticker for synthesis.
+- Reserved persistent AgentBubble slot (sticky panel) to avoid layout shifts during transitions.
+- Ensured responsive grid layout (content + side slot) and correct z-index layering within `src/components/revx/FocusOverlay.tsx` (overlay `z-50`, avatar `z-20`, header `z-10`).
+- No copy or backend integration included; placeholders only per scope.
+
+### Acceptance Trace
+- Progress lights animate on stage change.
+- Slides transition with directional meaning; smooth storyboard feel.
+- Agent avatar/pulse continuously animates.
+- Placeholder data animates in; numbers tick to target.
+- Layout clean on mobile/tablet/desktop; no collisions.
+- Panels/windows stack correctly above the glass background.
+
+### Next Steps
+- Hook telemetry `onSlideChange` to analytics once narrative is added.
+- Expand placeholders with richer visuals (icons, microflows) while staying performant.
+
+## 2025-08-09 — Revenue revx Step 1 (AgentBubble + FocusOverlay skeleton)
+### Completed
+- Added feature flag hook `src/hooks/useFeatureFlag.ts` (gate: `?revx=1`).
+- Created `src/components/revx/AgentBubble.tsx` (narrative bubble with "Learn more").
+- Created `src/components/revx/FocusOverlay.tsx` (portal modal with scroll lock, background inert, focus trap, ESC, focus-restore).
+- Created `src/components/revx/StackCarousel.tsx` (placeholder slides; arrow keys + swipe; slide bars).
+- Created minimal telemetry util `src/utils/telemetry.ts` with sampling.
+- Integrated into `src/widgets/RevenuePulse.tsx` behind flag: hotspot button, collision-aware bubble, outside-click dismiss, and overlay with carousel.
+- Emitted events: `revx.bubble_open`, `revx.learn_more`, `revx.overlay_open`, `revx.slide_change`, `revx.overlay_close`.
+- Replaced emoji hotspot with a minimalist inline SVG (layers); added `aria-expanded` to reflect state.
+- Kept background JPEG-only for this pass; overlays opt-in via `?bg=overlay` unchanged.
+
+### Decisions
+- Transform/opacity-only animations (160–220 ms, ease [0.2, 0.8, 0.2, 1]); respect `prefers-reduced-motion`.
+- Blur gated off by default in overlay (mobile jank avoidance); opacity-dim fallback retained.
+- Maintain CardWidget semantics (`role="button"`) and stopPropagation on inner actions.
+- Mobile-first behavior: bubble toggles on tap; dismiss on outside/ESC; width clamped.
+
+### Next Steps
+- Polish copy, add icons, and refine density for compact buckets.
+- Add deeper slide content and progress indicators; consider lazy-loading assets.
+- QA per checklist: keyboard path, mobile tap+swipe, 360/768/1440/1920 visuals, no console warnings, CLS ~0.
+- After local QA, push and redeploy; validate at https://riskill-zones-glass.windsurf.build/?revx=1 and share with Joe.
+
+### Notes
+- If Vite shows "Outdated Optimize Dep" (504), stop dev server, delete `riskill-cinematic/node_modules/.vite`, and restart dev.
+## 2025-08-09 — Top Widgets polish + propagation fix
+### Completed
+- Added `event.stopPropagation()` in `src/widgets/QuickAction.tsx` to prevent parent `onPrimaryAction` from firing when quick actions are clicked.
+- Applied responsive density tuning with `useResizeDensity` to:
+  - `src/widgets/OpsHealth.tsx`
+  - `src/widgets/RiskAlerts.tsx`
+  - `src/widgets/AgentActivity.tsx`
+  Adjusted typography (`text-[]` buckets), meters, and indicator sizes per breakpoint.
+- Audited nested button issue: `CardWidget` now uses `motion.div` with `role="button"`; no remaining `motion.button` instances found. QuickAction buttons are safe within a role-based wrapper.
+- Kept background at JPEG-only for stability; prepared CSS for future WebP but reverted until asset exists.
+
+### Decisions
+- Maintain accessibility: `role="button"` + keyboard handlers on interactive `CardWidget`; focus ring via `group-focus-within`.
+- Micro-interactions remain transform/opacity only; preserve reduced-motion guard.
+
+### Next Steps
+- Optional: create `public/assets/bg/nature-vista-dark.webp` and re-introduce `image-set()` fallback in CSS.
+- Run dev server at http://localhost:5178; verify no hydration warnings; QA responsive (360/768/1440/1920) + Lighthouse mobile ≥85.
+- If clean, push and redeploy; validate live and share preview to Joe.
+
 
 ## 2025-08-08 — Doc alignment for cinematic intro
 - Completed:

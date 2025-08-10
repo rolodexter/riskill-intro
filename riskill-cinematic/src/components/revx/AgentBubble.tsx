@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { REVX_UI } from "../../content/revx";
 
 export function AgentBubble({
   open,
@@ -42,8 +43,8 @@ export function AgentBubble({
 
   const isCompact = density === "xs" || density === "sm";
   const copy = isCompact
-    ? "Live insight from coordinated AI models."
-    : "Live insight. LLMs parsed reports, Vision read invoices, Symbolic models forecasted.";
+    ? REVX_UI.bubble.copy_compact
+    : REVX_UI.bubble.copy_full;
 
   return (
     <AnimatePresence>
@@ -61,7 +62,7 @@ export function AgentBubble({
           }
           role="dialog"
           aria-modal="false"
-          aria-label="AI explanation"
+          aria-label={REVX_UI.bubble.aria_label}
         >
           <div className="rounded-xl bg-onyx2/95 backdrop-blur-xs border border-white/10 shadow-glass p-3 md:p-4 text-xs md:text-sm text-textPri">
             <div className="flex items-start gap-2">
@@ -73,7 +74,7 @@ export function AgentBubble({
                 </svg>
               </span>
               <p className="leading-snug">
-                {copy} <span className="hidden md:inline">Want to see the stack?</span>
+                {copy} <span className="hidden md:inline">{REVX_UI.bubble.prompt_stack}</span>
               </p>
             </div>
             <div className="flex justify-end mt-3">
@@ -83,9 +84,9 @@ export function AgentBubble({
                   e.stopPropagation();
                   onLearnMore();
                 }}
-                aria-label="Learn more"
+                aria-label={REVX_UI.bubble.learn_more}
               >
-                Learn more
+                {REVX_UI.bubble.learn_more}
               </button>
             </div>
           </div>

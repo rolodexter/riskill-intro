@@ -7,12 +7,18 @@ export function FocusOverlay({
   onClose,
   children,
   allowBlur = false,
+  ctaLabel,
+  onCta,
+  ctaDisabled,
 }: {
   title?: string;
   isOpen: boolean;
   onClose: () => void;
   children: React.ReactNode;
   allowBlur?: boolean;
+  ctaLabel?: string;
+  onCta?: () => void;
+  ctaDisabled?: boolean;
 }) {
   const overlayRef = useRef<HTMLDivElement>(null);
   const lastActive = useRef<Element | null>(null);
@@ -103,7 +109,19 @@ export function FocusOverlay({
       >
         <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
           <h2 className="text-sm font-medium">{title}</h2>
-          <button onClick={onClose} className="size-9 rounded-lg bg-white/6 hover:bg-white/10" aria-label="Close">✕</button>
+          <div className="flex items-center gap-2">
+            {ctaLabel && (
+              <button
+                type="button"
+                className="px-3 h-9 rounded-lg bg-white/10 border border-white/15 hover:bg-white/15 text-[13px]"
+                onClick={(e) => { e.stopPropagation(); onCta?.(); }}
+                disabled={ctaDisabled}
+              >
+                {ctaLabel}
+              </button>
+            )}
+            <button onClick={onClose} className="size-9 rounded-lg bg-white/6 hover:bg-white/10" aria-label="Close">✕</button>
+          </div>
         </div>
         <div
           ref={overlayRef}

@@ -1,5 +1,11 @@
 # WORKLOG
 
+2025-08-11 (Deploy fix — Operations deck)
+- Cause: Netlify build failed (TS6133) from unused function `isTouchDevice` in `src/widgets/Operations.tsx`.
+- Fix: Removed the unused function; re-ran build and triggered redeploy via Windsurf → Netlify (project_id `4f899b16-7efd-48f0-8867-9860d6b8154b`).
+- Status: Redeploy in progress at https://riskill-chat-overlay.windsurf.build/?revx=1. Console must remain clean.
+- Next: After live, run Lighthouse (mobile & desktop) and axe; record results here; fix critical issues; redeploy.
+
 2025-08-08
 - Completed: Initialized Vite React+TS app; installed framer-motion and @types/node; configured Vite to host localhost:5178 strict.
 - Decisions: Use localhost with strictPort; typography-first cinematic; motion via transform/opacity only.

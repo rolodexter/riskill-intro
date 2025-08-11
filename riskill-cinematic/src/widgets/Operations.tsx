@@ -86,10 +86,6 @@ const PAGES: Page[] = [
 const HOVER_FLAG = "riskill:ops:hover_intro:v1";
 const FIRST_CLICK_FLAG = "riskill:ops:first_click:v1";
 
-function isTouchDevice(){
-  if (typeof window === 'undefined') return false;
-  return ('ontouchstart' in window) || (navigator as any)?.maxTouchPoints > 0;
-}
 
 export default function Operations() {
   const { ref } = useResizeDensity();

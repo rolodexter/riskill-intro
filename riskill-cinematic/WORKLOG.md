@@ -52,3 +52,19 @@
 - Fix: Removed unused `React` import from `src/components/icons/KPI.tsx` to satisfy TS build.
 - Build: `npm run build` passes (tsc + vite). Ready for QA on localhost:5178 with `?revx=1`.
 - Next Steps: Run dev server, QA widget transitions and chat narrative, then commit/push and redeploy.
+
+2025-08-11 (Chat overlay anchoring)
+- Completed: Introduced grid overlay inside `src/App.tsx` `<main>` as `#dashboard-overlay` (`absolute inset-0 z-[90]`). Marked app root `relative isolate` and main `relative` for correct stacking/offset context. Portaled `src/components/chat/ChatWindow.tsx` into the overlay using `createPortal`.
+- Completed: Switched chat window/bubble from `fixed` to `absolute` within overlay, preserving transform/opacity-only animations and reduced-motion. Added pointer-events hygiene (overlay shell `pointer-events-none`, chat root `pointer-events-auto`).
+- Completed: Rewrote placement to compute `top/left` relative to overlay rect with collision handling (prefer right of anchor; flip to left; center+below fallback; clamped). Added scroll/resize listeners and `ResizeObserver` (with TS-safe construction) and rAF batching.
+- Completed: Mobile bottom-sheet keeps full-width and now accounts for on-screen keyboard via `visualViewport` offset. Min bubble anchored to overlay bottom-right.
+- A11y: Added `aria-describedby` linking to narrative block; preserved dialog semantics, focus behaviors, and ESC/Minimize controls.
+- Fix: TS lint error on optional `new ResizeObserver` call resolved.
+- Next Steps: Full QA desktop/mobile, run Lighthouse + axe, update README/PROJECT_STRUCTURE, then commit, push, and redeploy behind `?revx=1`.
+
+2025-08-11 (Chat as frameless GlassCard)
+- Completed: Restyled `src/components/chat/ChatWindow.tsx` to match widget GlassCard aesthetics without a visible border: `rounded-2xl`, `bg-white/6–8`, `backdrop-blur-lg`, `ring-1 ring-white/[0.02]`, elevated shadow `shadow-[0_8px_28px_rgba(0,0,0,.28)]`.
+- Completed: Unified paddings/typography: header/body/footer use `p-4 sm:p-5`; title `text-sm font-semibold tracking-[-0.01em]`; body `text-[13px] text-white/80`.
+- Completed: Controls updated to shared style pattern: icon buttons `size-8 rounded-xl border border-white/10 bg-white/5 hover:bg-white/8`; input `h-11 rounded-xl bg-white/5 border-white/10` with focus rings; footer divider `border-white/5`.
+- UX: Chat scroller has `overscroll-contain`; bottom-sheet composer adds `padding-bottom: env(safe-area-inset-bottom)`; will-change hints added; no layout thrash.
+- Next: Consider transform-based translate placement, tokens for z-tiers, and grid scroller observer.

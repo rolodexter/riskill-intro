@@ -11,10 +11,10 @@ import { useFeatureFlag } from "./hooks/useFeatureFlag";
 export default function App(){
   const revx = useFeatureFlag("revx");
   return (
-    <div className="min-h-dvh text-textPri">
+    <div className="relative isolate min-h-dvh text-textPri">
       <GradientBackdrop />
       <TopWidgets />
-      <main className="mx-auto max-w-[1280px] w-full px-4 md:px-6">
+      <main className="relative mx-auto max-w-[1280px] w-full px-4 md:px-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6 py-6">
           {/* Left 25% */}
           <aside className="md:col-span-1 order-3 md:order-1"><LeftZone /></aside>
@@ -23,6 +23,8 @@ export default function App(){
           {/* Right 25% */}
           <aside className="md:col-span-1 order-4 md:order-3"><RightZone /></aside>
         </div>
+        {/* Grid overlay root for floating widgets (chat, etc.). Pointer-events off by default. */}
+        <div id="dashboard-overlay" className="pointer-events-none absolute inset-0 z-[90]" />
       </main>
       <Footer />
       {revx && <ChatWindow />}

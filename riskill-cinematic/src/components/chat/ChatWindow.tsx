@@ -8,7 +8,8 @@ export type ChatContext = {
   cardId?: string;
   title?: string;
   primary?: string;
-  metrics?: Array<{ label: string; value: string }>;
+  // Accept either simple label/value or richer records (e.g., domain metrics)
+  metrics?: Array<Record<string, unknown>>;
   anchorRect?: { top: number; left: number; right: number; bottom: number; width: number; height: number };
   narrative?: string;
 };
@@ -286,12 +287,32 @@ export default function ChatWindow() {
               )}
               {ctx?.metrics && (
                 <div className="grid grid-cols-2 gap-2">
-                  {ctx.metrics.map((m, i) => (
-                    <div key={i} className="rounded-xl border border-white/10 bg-white/5 px-2 py-1">
-                      <div className="text-[10px] uppercase tracking-wide text-white/60">{m.label}</div>
-                      <div className="text-sm font-semibold tabular-nums">{m.value}</div>
-                    </div>
-                  ))}
+                  {ctx.metrics.map((m, i) => {
+                    const rec = (m || {}) as Record<string, unknown>;
+                    // Back-compat: label/value
+                    const label = typeof rec.label === 'string' ? rec.label : (
+                      typeof rec.domain === 'string' ? (rec.domain as string) : undefined
+                    );
+                    const value = typeof rec.value === 'string' ? rec.value : (
+                      rec.score != null ? String(rec.score) : undefined
+                    );
+                    const trend = typeof rec.trend === 'string' ? rec.trend : undefined;
+                    const coverage = typeof rec.coverage === 'string' ? rec.coverage : undefined;
+                    return (
+                      <div key={i} className="rounded-xl border border-white/10 bg-white/5 px-2 py-1">
+                        <div className="text-[10px] uppercase tracking-wide text-white/60 truncate">{label ?? 'Metric'}</div>
+                        <div className="text-sm font-semibold tabular-nums">
+                          {value ?? (trend || coverage ? '' : '—')}
+                        </div>
+                        {(trend || coverage) && (
+                          <div className="text-[11px] text-white/70 flex gap-2">
+                            {trend && <span>{trend}</span>}
+                            {coverage && <span className="text-white/60">{coverage}</span>}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               )}
               <div className="text-xs text-white/70">

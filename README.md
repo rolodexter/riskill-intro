@@ -3,7 +3,7 @@
 Deliver a responsive, glassmorphic dashboard comprised of independent CardWidgets (micro-apps). Each card manages its own state and quick actions, and cards communicate via a lightweight pub/sub event bus. The layout is accessible, performant, and degrades gracefully on small devices.
 
 ## Landing Grid Scope
-- Top Row: RevenuePulse, OpsHealth, RiskAlerts, AgentActivity
+- Top Row: RevenuePulse, OpsHealth, RiskIndex, AgentActivity
 - Left Zone: NavigationCard, FiltersCard, DataSourcesCard
 - Middle Zone: CommandCanvasCard, InsightStreamCard, ActionQueueCard
 - Right Zone: RecommendationsCard, AlertsCard, CtaCard
@@ -38,8 +38,12 @@ Deliver a responsive, glassmorphic dashboard comprised of independent CardWidget
 - `filters.apply` → `{ query, tags[] }`
 - `insight.highlight` → `{ id }`
 - `nav.goto` → `{ section: "overview" | "sources" | "agents" | "insights" }`
- - `progressive.open` → `{ source: string; cardId?: string; title?: string; metrics?: { label: string; value: string }[] }`
+- `progressive.open` → `{ source: string; cardId?: string; title?: string; metrics?: { label: string; value: string }[] }`
 Note: In‑memory bus (`src/widgets/bus.ts`) for now; TODO: event bridge with persistence/audit.
+
+### Operations Deck — Ops topics
+- `ops.scroll.wheel` → `{ delta: number; mode: 0 | 1 | 2 }` (normalized wheel delta; capture-phase, non-passive)
+- `ops.scroll.cycle` → `{ index: number; total: number }` (card index change in Operations deck)
 
 ## Revenue revx — Sprint 1 and 1.5
 

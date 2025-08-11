@@ -26,6 +26,26 @@ Authoritative docs (absolute paths):
 - WORKLOG.md
   - Chronological entries using the template below.
 
+## Current Execution Plan — Operations Deck (Act I)
+
+- Scope: Refine Act I framing intro inside the Operations widget flow (`riskill-cinematic/src/widgets/Operations.tsx`). Keep CardWidget chrome; no overlay. Replace CTA buttons with lightweight interactions: info tooltip and clickable integration tags that open a sources modal.
+- Header pattern: title + fraction + descriptor + info icon. Microcopy trimmed for executive rhythm.
+- A11y: integration tags rendered as buttons; info icon has aria-label; modal dismissible (Done/ESC); deck has `role="region"` + `aria-label`.
+- Telemetry: `ops.scroll.wheel`, `ops.scroll.cycle`, `progressive.open` for chat escalation hooks.
+- Behavior: Act I auto-dismisses after ~5.5s or on first wheel/flick, then continues to standard rotation.
+- Live preview: https://riskill-chat-overlay.windsurf.build/?revx=1 (console must remain clean).
+- Next: Run Lighthouse (mobile & desktop) and axe; record results in `WORKLOG.md`; fix critical issues; redeploy.
+
+### Visual Stratification — Top Row KPI Band
+
+- Implement subtle transparency increase for the top row only to signal an executive/KPI band.
+- Mechanism: container-level CSS variable `--rk-card-alpha` consumed by `CardWidget` background.
+- Defaults: `0.70` (all cards). Top row override: `0.60`.
+- Files:
+  - `src/widgets/CardWidget.tsx` → uses `bg-[rgb(15_23_42/var(--rk-card-alpha,0.70))]`.
+  - `src/components/landing/TopWidgets.tsx` → sets `data-band="top"` and `style={{ '--rk-card-alpha': 0.60 }}` on the grid container.
+- Guardrails: maintain AA contrast; adjust inner shadow/edge by ≤15% if audits flag contrast issues.
+
 ## Current Execution Plan — Revenue revx Step 1
 
 - Scope: Implement feature-flagged AgentBubble → Learn more → FocusOverlay (portal) → StackCarousel (placeholder slides) in `RevenuePulse.tsx`.

@@ -1,4 +1,5 @@
-import type { ReactNode, KeyboardEvent, WheelEvent } from "react";
+import type { ReactNode, KeyboardEvent, WheelEvent, MouseEvent } from "react";
+import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 
 export type CardProps = {
@@ -13,10 +14,13 @@ export type CardProps = {
   onPrimaryAction?: () => void;
   hoverLift?: boolean; // enable hover translate/scale; disable to avoid new stacking context
   headerHeight?: number; // optional fixed header height in px; content area will fill the rest
+  headerTight?: boolean; // reduce header vertical spacing
+  headerDivider?: boolean; // draw a subtle divider under the header
   keyboardActivation?: boolean; // when interactive, if false, Enter/Space won't trigger the action
   onWheel?: (e: WheelEvent<HTMLDivElement>) => void; // optional wheel handler for scroll-to-cycle widgets
   onKeyDown?: (e: KeyboardEvent<HTMLDivElement>) => void; // optional key handler (e.g., Arrow cycle)
   chrome?: "default" | "none"; // when "none", render full-bleed surface without header/padding
+  ariaLabel?: string; // optional accessible name override for interactive card
 };
 
 export default function CardWidget({
@@ -31,22 +35,48 @@ export default function CardWidget({
   onPrimaryAction,
   hoverLift = true,
   headerHeight,
+  headerTight = false,
+  headerDivider = false,
   keyboardActivation = true,
   onWheel,
   onKeyDown,
   chrome = "default",
+  ariaLabel,
 }: CardProps) {
+  const rootRef = useRef<HTMLDivElement | null>(null);
+
+  // Native wheel listener in capture phase to pre-empt page scroll when hovering the card
+  useEffect(() => {
+    if (!interactive || !onWheel) return;
+    const el = rootRef.current;
+    if (!el) return;
+    const handler = (ev: globalThis.WheelEvent) => {
+      // Forward to consumer; they will decide whether to preventDefault()
+      try {
+        (onWheel as unknown as (e: any) => void)(ev);
+      } catch {}
+    };
+    el.addEventListener("wheel", handler as EventListener, { passive: false, capture: true } as AddEventListenerOptions);
+    return () => {
+      el.removeEventListener("wheel", handler as EventListener, { capture: true } as any);
+    };
+  }, [interactive, onWheel]);
   const content = (
     chrome === "none" ? (
       <div
         className={
-          "card-root relative overflow-hidden z-0 rounded-2xl border border-white/10 bg-white/5 md:bg-white/6 " +
-          "md:backdrop-blur-xl shadow-glass group h-[172px] sm:h-[188px] " +
+          "card-root relative overflow-hidden z-0 rounded-2xl border border-white/5 bg-[rgb(15_23_42/var(--rk-card-alpha,0.70))] " +
+          "md:backdrop-blur-md shadow-[0_8px_28px_rgba(0,0,0,.42)] group h-[172px] sm:h-[188px] " +
+          "transition-shadow duration-150 ease-out hover:shadow-[0_10px_36px_rgba(0,0,0,.5)] " +
           className
         }
       >
         {/* static sheen */}
         <div className="pointer-events-none absolute inset-0 rounded-2xl bg-sheen opacity-15 z-0" />
+        {/* gradient edge highlight */}
+        <div className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-b from-white/[0.04] via-transparent to-white/[0.02] z-0" />
+        {/* inner shadow for subtle depth */}
+        <div className="pointer-events-none absolute inset-0 rounded-2xl shadow-inner shadow-black/20 z-0" />
 
         <div className="card-content absolute inset-0 z-10">
           {status === "loading" ? (
@@ -68,18 +98,23 @@ export default function CardWidget({
     ) : (
       <div
         className={
-          "card-root relative overflow-hidden z-0 h-full rounded-2xl border border-white/10 bg-white/5 md:bg-white/6 " +
+          "card-root relative overflow-hidden z-0 h-full rounded-2xl border border-white/5 bg-[rgb(15_23_42/var(--rk-card-alpha,0.70))] " +
           "p-4 lg:p-5 " +
-          "md:backdrop-blur-xl shadow-glass group " +
+          "md:backdrop-blur-md shadow-[0_8px_28px_rgba(0,0,0,.42)] group " +
+          "transition-shadow duration-150 ease-out hover:shadow-[0_10px_36px_rgba(0,0,0,.5)] " +
           className
         }
       >
         {/* static sheen */}
         <div className="pointer-events-none absolute inset-0 rounded-2xl bg-sheen opacity-15 z-0" />
+        {/* gradient edge highlight */}
+        <div className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-b from-white/[0.04] via-transparent to-white/[0.02] z-0" />
+        {/* inner shadow for subtle depth */}
+        <div className="pointer-events-none absolute inset-0 rounded-2xl shadow-inner shadow-black/20 z-0" />
 
         {(title || actions) && (
           <div
-            className={`card-header relative z-10 ${headerHeight ? "flex items-center" : "pt-1 pb-2 min-h-[44px]"}`}
+            className={`card-header relative z-10 ${headerHeight ? "flex items-center" : (headerTight ? "pt-0.5 pb-1 min-h-[36px]" : "pt-1 pb-2 min-h-[44px]")}`}
             style={headerHeight ? { height: headerHeight } : undefined}
           >
             <div className="pr-10">
@@ -90,6 +125,9 @@ export default function CardWidget({
             <div className="absolute top-2 right-2 z-30 opacity-0 max-[480px]:opacity-100 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-150 flex items-center gap-2 flex-wrap">
               {actions}
             </div>
+            {headerDivider && !headerHeight && (
+              <div className="pointer-events-none absolute left-3 right-3 -bottom-px h-px bg-white/10" aria-hidden />
+            )}
           </div>
         )}
 
@@ -120,10 +158,17 @@ export default function CardWidget({
 
   return (
     <motion.div
+      ref={rootRef}
       role="button"
-      aria-label={title ? `${title} card` : "Card"}
+      aria-label={ariaLabel ?? (title ? `${title} card` : "Card")}
       tabIndex={0}
-      onClick={onPrimaryAction}
+      onClick={(e: MouseEvent<HTMLDivElement>) => {
+        // Ignore if a nested handler already consumed it
+        if ((e as any).defaultPrevented) return;
+        const t = e.target as HTMLElement | null;
+        if (t && t.closest && t.closest('[data-disclosure]')) return;
+        onPrimaryAction?.();
+      }}
       onKeyDown={(e) => {
         // custom handler first so widget logic can intercept keys (e.g., ArrowLeft/Right, Enter)
         if (onKeyDown) onKeyDown(e);
@@ -133,7 +178,6 @@ export default function CardWidget({
           if (keyboardActivation) onPrimaryAction();
         }
       }}
-      onWheel={onWheel}
       className="w-full text-left rounded-2xl focus:outline-none"
       initial={false}
       whileHover={hoverLift ? { y: -2, scale: 1.01 } : undefined}

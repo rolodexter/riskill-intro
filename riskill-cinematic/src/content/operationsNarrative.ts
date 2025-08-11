@@ -12,13 +12,13 @@ export interface SystemsCatalog {
 
 export const MICRO: MicroEntry[] = [
   { key: "uptime",  label: "Uptime",  maxWords: 15,
-    summary: "99.9% service uptime — uninterrupted delivery this week.",
+    summary: "99.9% uptime — uninterrupted this week.",
     prompts: ["Explain last incident", "Compare uptime by vendor", "Forecast risk next 14 days"] },
   { key: "backlog", label: "Backlog", maxWords: 15,
-    summary: "Low backlog — only 3 open issues, trending down.",
+    summary: "Backlog minimal: 3 issues, declining.",
     prompts: ["Top causes this month", "Who’s blocked and why", "Cycle time vs last quarter"] },
   { key: "sla",     label: "SLA",     maxWords: 15,
-    summary: "All service commitments met — no penalties projected.",
+    summary: "SLAs met, zero penalties forecast.",
     prompts: ["Which contracts are at risk", "Latency trend 95th pct", "Penalty impact modeling"] }
 ];
 

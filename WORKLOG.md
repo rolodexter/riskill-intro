@@ -1,4 +1,28 @@
 # WORKLOG — Riskill Cinematic
+## 2025-08-11 — Risk Index (Widget 3) stub + rename
+### Completed
+- Added `src/content/risks.ts` with types (`RiskDomain`, `RiskIndexPayload`), label thresholds, helper `labelForComposite`, and mock payload generator `getMockRiskIndexPayload()`.
+- Created `src/widgets/RiskIndex.tsx` numeric tile: composite score, qualitative label, top domain movements (↑/↓), and 7‑day delta (clamped ±20). ARIA summary assembled; emits sampled telemetry (`risk.index.view`, `risk.drilldown.open`).
+- Swapped `RiskAlerts` → `RiskIndex` in `src/components/landing/TopWidgets.tsx`; preserved KPI band transparency via `--rk-card-alpha`.
+- Updated docs to reflect rename: `PROJECT_STRUCTURE.md` (Top Row + checklist) and `README.md` (Landing Grid Scope).
+### Next Steps
+- Wire drilldown modal (domains/bottlenecks tabs) and `risk.index.refresh` timer hook.
+- Run Lighthouse + axe on live once deployed; record results here and prioritize fixes.
+
+## 2025-08-11 — Operations Deck Act I in-widget + redeploy
+### Completed
+- Implemented Act I framing intro as the first card in `riskill-cinematic/src/widgets/Operations.tsx` using consistent `CardWidget` chrome (no overlay).
+- Replaced CTAs with lightweight affordances: info tooltip and clickable integration tags (SAP, Salesforce, ServiceNow, Asana, Snowflake, SharePoint).
+- Added sources modal with integration grid (ERP/CRM/ITSM/Projects/Data/Docs); selected tag highlights.
+- Merged header layout: title + fraction + descriptor + info icon; trimmed microcopy.
+- Emitted ops telemetry: `ops.scroll.wheel`, `ops.scroll.cycle` and reserved `progressive.open` for escalation.
+- Built and redeployed to Windsurf: https://riskill-chat-overlay.windsurf.build/?revx=1 (console clean).
+### Decisions
+- Keep Act I auto-dismiss (~5.5s) or on first wheel/flick to maintain executive rhythm.
+- Accessibility: tags as buttons, info icon aria-label, modal ESC/Done, deck `role="region"` + `aria-label`.
+### Next Steps
+- Run Lighthouse (mobile & desktop) and axe on live; record results here; address critical issues; redeploy.
+
 ## 2025-08-09 — Stack Explorer Sprint 1 — UI/UX skeleton
 ### Completed
 - Implemented segmented progress tracker (5 steps) with subtle glow/scale on active in `src/components/revx/StackCarousel.tsx`.
@@ -232,3 +256,21 @@
 - Implement rotating RevenueWidget (wheel/arrow/swipe) and floating Chat window with docked summon/minimize/restore.
 - Wire `useProgressiveDisclosure.ts` to publish `progressive.open` with card context and have chat consume.
 - QA: reduced-motion, focus trap/restore, z-index layering, 60fps feel; prepare for live validation behind `?revx=1`.
+
+## 2025-08-10 — Risk Index drilldown stub + ARIA/thresholds + refresh loop
+### Completed
+- Updated `src/content/risks.ts` label thresholds per approved semantics (higher=better): 0–34 high; 35–69 moderate; 70–84 low; 85–100 very low.
+- Adjusted `src/widgets/RiskIndex.tsx`:
+  - Stable threshold to 0.02; movements use ↑/↓/stable visually; screen readers get words (rising/declining/stable) in `aria-label`.
+  - Added FocusOverlay-based drilldown modal with tabs: Domains and Bottlenecks.
+  - Domains tab lists per-domain score, trend, last update, and coverage; emits `risk.domain.toggle` on row click.
+  - Wired 30s refresh loop that regenerates mock payload and emits `risk.index.refresh`.
+  - Kept existing telemetry: `risk.index.view`, `risk.drilldown.open(panel)`.
+### QA Checklist (tile)
+- Contrast AA on top-band `--rk-card-alpha=0.60`.
+- Arrow glyphs hidden from SR; ARIA uses words.
+- Reduced motion respected; numeric fades only (no gauge yet).
+- No nested-button bubbling; CTA uses stopPropagation.
+### Next Steps
+- Deploy to Windsurf/Netlify and share preview URL for review.
+- Run Lighthouse (mobile/desktop) and axe on live; append results here and file/fix critical issues.

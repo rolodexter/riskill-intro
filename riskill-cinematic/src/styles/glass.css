@@ -1,0 +1,71 @@
+@layer components {
+  /* Base frameless card (keeps no-border look) */
+  .rk-card {
+    @apply relative rounded-2xl overflow-hidden backdrop-blur-md transition-all duration-150 ease-out;
+    /* Dark glass with a bit more transparency */
+    --rk-card-alpha: 0.58; /* tweak 0.54–0.62 to taste */
+    background-color: rgb(var(--rk-card) / var(--rk-card-alpha));
+    box-shadow: 0 10px 32px -10px rgba(0,0,0,.55);
+  }
+
+  /* Hover/active micro-interactions */
+  .rk-card:hover  { transform: translateZ(0) scale(1.01); box-shadow: 0 14px 40px -10px rgba(0,0,0,.6); }
+  .rk-card:active { transform: scale(.99); }
+
+  /* Diagonal gradient sheen (top-left ➝ bottom-right) */
+  .rk-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    /* Very soft diagonal—adds curvature without reading as a border */
+    background: linear-gradient(
+      135deg,
+      rgba(255,255,255,0.08) 0%,
+      rgba(255,255,255,0.03) 38%,
+      rgba(0,0,0,0.20) 100%
+    );
+    mix-blend-mode: soft-light;
+    opacity: 0.9;
+    transition: opacity .15s ease-out;
+  }
+  .rk-card:hover::before { opacity: 1; }
+
+  /* Optional: edge fade vignette for extra depth */
+  .rk-card::after{
+    content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+    background: radial-gradient(120% 120% at 10% 8%, transparent 0%, transparent 60%, rgba(0,0,0,.12) 100%);
+  }
+
+  /* Ghost depth layers (subtle lift) */
+  .rk-ghost-1, .rk-ghost-2 { pointer-events: none; position: absolute; inset: 0; border-radius: 1rem; }
+  .rk-ghost-1 { transform: translateY(6px) scale(.98);  background: rgba(255,255,255,.045); opacity: .9; }
+  .rk-ghost-2 { transform: translateY(12px) scale(.96); background: rgba(255,255,255,.03);  opacity: .7; }
+
+  /* Focus ring for keyboard users (keeps frameless default) */
+  .rk-focus:focus-visible {
+    outline: 2px solid rgb(var(--rk-accent));
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  /* Rotating stack surface: contain scroll, allow vertical pan, and optimize painting */
+  .rk-rotate-surface {
+    overscroll-behavior: contain;
+    touch-action: pan-y;
+    contain: layout paint;
+    backface-visibility: hidden;
+    transform-style: preserve-3d;
+  }
+
+  /* Faces layering helpers to avoid jumble during transitions */
+  .rk-face { position: absolute; inset: 0; overflow: hidden; will-change: transform, opacity; }
+  .rk-face--current { z-index: 10; }
+  .rk-face--outgoing { z-index: 0; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .rk-rotate-surface .rk-face { transition: none !important; }
+  }
+}

@@ -58,7 +58,7 @@
 - Single page; no routing. All visible panels are independent CardWidgets (micro‑apps).
 
 ### Layout Grid & Zone Map
-- Top Row (wraps on small screens): `RevenuePulse`, `OpsHealth`, `RiskAlerts`, `AgentActivity`.
+- Top Row (wraps on small screens): `RevenuePulse`, `OpsHealth`, `RiskIndex`, `AgentActivity`.
 - Main Grid (desktop 25% / 50% / 25%; mobile stacks Top → Middle → Left → Right):
   - Left Zone: `NavigationCard`, `FiltersCard`, `DataSourcesCard`.
   - Middle Zone: `CommandCanvasCard`, `InsightStreamCard`, `ActionQueueCard`.
@@ -109,13 +109,25 @@
 ### File/Zone Checklist
 - [x] Base: `CardWidget.tsx`, `QuickAction.tsx`, `useResizeDensity.ts`, `bus.ts`
 - [ ] Progressive Disclosure: `useProgressiveDisclosure.ts`
-- [x] Top Row: `RevenuePulse.tsx`, `OpsHealth.tsx`, `RiskAlerts.tsx`, `AgentActivity.tsx`
+- [x] Top Row: `RevenuePulse.tsx`, `OpsHealth.tsx`, `RiskIndex.tsx`, `AgentActivity.tsx`
 - [x] Left: `NavigationCard.tsx`, `FiltersCard.tsx`, `DataSourcesCard.tsx`
 - [x] Middle: `CommandCanvasCard.tsx`, `InsightStreamCard.tsx`, `ActionQueueCard.tsx`
 - [x] Right: `RecommendationsCard.tsx`, `AlertsCard.tsx`, `CtaCard.tsx`
 - [x] Zones wired: `TopWidgets.tsx`, `LeftZone.tsx`, `MiddleCanvas.tsx`, `RightZone.tsx`
 - [x] Background image + overlay gradient applied
 - [x] Density tuning across key widgets (RevenuePulse, CommandCanvas, Recommendations)
+
+### Operations Deck — Act I framing intro (spec)
+- Widget: `riskill-cinematic/src/widgets/Operations.tsx` renders a full-bleed, vertical stacked card carousel with infinite loop and auto-rotate (pause on hover/interact). Indicator shows N/M.
+- Act I: first state in the stack, using the same `CardWidget` chrome. Presents concise value prop copy and a row of integration tags (SAP, Salesforce, ServiceNow, Asana, Snowflake, SharePoint). No overlay and no CTA buttons.
+- Progressive disclosure: a small info icon shows a tooltip on hover/tap. Clicking the icon or any integration tag opens a sources modal with an integration grid grouped by ERP/CRM/ITSM/Projects/Data/Docs. The selected tag is highlighted in the modal.
+- Header pattern: title “Operations”, fraction (e.g., 1/4), descriptor (e.g., “Connected data overview”), and an info icon, all in the card header row.
+- Auto-dismiss: Act I transitions to live metrics after ~5.5s or on first user interaction (wheel or flick).
+- Accessibility: deck `role="region"` + `aria-label="Operations deck"`; tags are rendered as buttons with focus states; info icon has `aria-label`; modal dismissible via button and ESC; reduced-motion uses crossfade only.
+- Interaction: wheel navigation with capture-phase non-passive listener and delta normalization to prevent page scroll; pointer-based vertical flick with distance/velocity thresholds; keyboard rotation disabled (no tabIndex on deck).
+- Telemetry: emits `ops.scroll.wheel`, `ops.scroll.cycle`; chat escalation reserved via `progressive.open` topic.
+- Performance: transform/opacity-only transitions; fixed card height; zero CLS; 60fps target on mid-tier devices; no console warnings.
+- Live preview: https://riskill-chat-overlay.windsurf.build/?revx=1
 
 ### Revenue revx (feature‑flagged) — Step 1
 - Flag: enable with `?revx=1` (handled by `src/hooks/useFeatureFlag.ts`). Without the flag, no visual/behavioral change.

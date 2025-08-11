@@ -3,9 +3,10 @@ import { createPortal } from "react-dom";
 import CardWidget from "./CardWidget";
 import { useResizeDensity } from "./useResizeDensity";
 import { useProgressiveDisclosure } from "../hooks/useProgressiveDisclosure";
-import { MICRO } from "../content/operationsNarrative";
+import { MICRO, SYSTEMS } from "../content/operationsNarrative";
 import { emit } from "../utils/telemetry";
 import { AnimatePresence, motion } from "framer-motion";
+import Disclosure from "../ui/Disclosure";
 
 /*
 Widget Layout Strategy — Operations Card
@@ -64,7 +65,7 @@ const PAGES: Page[] = [
   {
     key: 'performance',
     label: 'Performance',
-    headline: 'Avg Lat. 230ms',
+    headline: 'Avg Lat. 230 ms',
     secondaries: [
       { label: 'Throughput', value: '1.2k/min' },
       { label: 'SLA', value: 'Met' },
@@ -79,12 +80,13 @@ const PAGES: Page[] = [
       { label: 'Next week', value: 'Green' },
       { label: 'Watch', value: 'Tue upgrade' },
     ],
-    note: 'Next week risk: low (infra upgrade Tue).',
+    note: 'Next week stable; infra upgrade Tue.',
   },
 ];
 
 const HOVER_FLAG = "riskill:ops:hover_intro:v1";
 const FIRST_CLICK_FLAG = "riskill:ops:first_click:v1";
+const ACT_I_FLAG = "riskill:act1:intro:v1";
 
 
 export default function Operations() {
@@ -103,6 +105,12 @@ export default function Operations() {
   const [hintFaded, setHintFaded] = useState(false);
   const lastInteractRef = useRef<number>(Date.now());
   const [autoPaused, setAutoPaused] = useState(false);
+  const [showActI, setShowActI] = useState<boolean>(() => {
+    if (typeof localStorage === 'undefined') return false;
+    return !localStorage.getItem(ACT_I_FLAG);
+  });
+  const [showSources, setShowSources] = useState(false);
+  const [selectedSource, setSelectedSource] = useState<string | null>(null);
 
   // compact typography handled inline per spec
 
@@ -136,6 +144,10 @@ export default function Operations() {
       const now = performance.now();
       if (now - last < 220) return; // throttle
       ev.preventDefault();
+      // If Act I is showing, proceed to live ops on first interaction
+      if (showActI) {
+        proceedActI();
+      }
       const dir = delta > 0 ? 1 : -1;
       setIdx(prev => {
         const next = (prev + dir + PAGES.length) % PAGES.length;
@@ -202,6 +214,14 @@ export default function Operations() {
     openChat(currentPage.key);
   }
 
+  // Act I: mark as seen and transition into live ops
+  function proceedActI() {
+    try { localStorage?.setItem(ACT_I_FLAG, "1"); } catch {}
+    setShowActI(false);
+    // pause auto-rotate momentarily to avoid immediate flip
+    lastInteractRef.current = Date.now();
+  }
+
   // ESC to close first-click intro (does not mark as seen)
   useEffect(() => {
     if (!showFirstClickIntro) return;
@@ -214,6 +234,13 @@ export default function Operations() {
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
   }, [showFirstClickIntro]);
+
+  // Auto-dismiss Act I after a brief dwell
+  useEffect(() => {
+    if (!showActI) return;
+    const t = setTimeout(() => proceedActI(), 5500);
+    return () => clearTimeout(t);
+  }, [showActI]);
 
   // Auto-cycle pages every 7s, pause on hover/focus or after manual interaction for 20s
   useEffect(() => {
@@ -383,42 +410,160 @@ export default function Operations() {
           ref={deckRef}
           role="region"
           aria-label="Operations deck"
-          className="absolute inset-0 pointer-events-auto overscroll-contain"
+          className="absolute inset-0 pointer-events-auto rk-rotate-surface"
         >
           {/* Depth preview ghosts behind active card */}
           <div className="absolute inset-0 pointer-events-none" aria-hidden>
-            <div className="absolute inset-0 scale-[0.95] translate-y-[14px] opacity-70 rounded-2xl bg-white/[0.04]" />
-            <div className="absolute inset-0 scale-[0.97] translate-y-[7px]  opacity-85 rounded-2xl bg-white/[0.05]" />
+            <div className="absolute inset-0 scale-[0.98] translate-y-[4px] opacity-50 rounded-2xl bg-white/[0.04]" />
+            <div className="absolute inset-0 scale-[0.96] translate-y-[8px] opacity-30 rounded-2xl bg-white/[0.03]" />
           </div>
 
           {/* ACTIVE CARD covers full surface */}
           <AnimatePresence initial={false} mode="popLayout">
-            <motion.div
-              key={currentPage.key}
-              className="absolute inset-0 rounded-2xl p-3 sm:p-3.5 flex flex-col pointer-events-auto"
-              initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 10, scale: 0.99 }}
-              animate={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
-              exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -10, scale: 0.99 }}
-              transition={{ duration: 0.28, ease:[0.2,0.8,0.2,1] }}
-            >
-              {/* Title row inside the card */}
-              <div className="flex items-center justify-between">
-                <div className="text-[12.5px] font-semibold tracking-[-0.01em]">Operations</div>
-                <div className="text-[11.5px] text-white/60">Composite operational view</div>
-              </div>
+            {showActI ? (
+              <motion.div
+                key="actI"
+                className="absolute inset-0 rounded-2xl p-3 sm:p-3.5 flex flex-col pointer-events-auto"
+                initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 10, scale: 0.99 }}
+                animate={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
+                exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -10, scale: 0.99 }}
+                transition={{ duration: 0.28, ease:[0.2,0.8,0.2,1] }}
+              >
+                {/* Top row: title + fraction + descriptor + unified disclosure */}
+                <div className="flex items-center justify-between">
+                  <div className="text-[12.5px] font-semibold tracking-[-0.01em]">
+                    Operations <span className="text-white/55">(1/{PAGES.length})</span>
+                    <span className="text-white/55"> — Connected data overview</span>
+                  </div>
+                  <Disclosure glossaryKey="ops.summary" placement="top-right" autoHintKey="ops:first-visit" />
+                </div>
 
-              {/* Headline */}
-              <div className="mt-1 text-[20px] leading-6 font-semibold tabular-nums">{currentPage.headline}</div>
+                {/* Icon strip / cluster */}
+                <div className="mt-2 flex flex-wrap gap-1.5 text-[11px] text-white/80">
+                  {[SYSTEMS.erp[0], SYSTEMS.crm[0], SYSTEMS.itsm[0], SYSTEMS.project[0], SYSTEMS.data[0], SYSTEMS.docs[0]]
+                    .filter(Boolean)
+                    .map((name, i) => (
+                      <button
+                        key={i}
+                        onClick={() => { setSelectedSource(name); setShowSources(true); }}
+                        className="px-2 py-1 rounded-lg bg-white/8 border border-white/10 hover:bg-white/12 focus:outline-none focus:ring-1 focus:ring-white/30 cursor-pointer"
+                        aria-label={`Show sources including ${name}`}
+                      >
+                        {name}
+                      </button>
+                    ))}
+                </div>
 
-              {/* Micro narrative */}
-              <div className="mt-1 text-[11.5px] text-white/75 line-clamp-2">{renderWithAbbr(currentPage.note)}</div>
+                {/* Copy */}
+                <div className="mt-2 text-[12.5px] leading-5 text-white/90">
+                  <div>Riskill AI is watching over your operations.</div>
+                  <div className="text-white/80">Every connected file, database, email, SaaS feed streams here in real time.</div>
+                </div>
 
-              {/* Spacer to push indicator to bottom-right */}
-              <div className="mt-auto text-right text-[11px] text-white/55 select-none">{idx + 1} / {PAGES.length}</div>
-            </motion.div>
+                {/* Spacer keeps rhythm consistent */}
+                <div className="mt-auto" />
+              </motion.div>
+            ) : (
+              <motion.div
+                key={currentPage.key}
+                className="absolute inset-0 rounded-2xl p-3 sm:p-3.5 flex flex-col pointer-events-auto"
+                initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 10, scale: 0.99 }}
+                animate={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
+                exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -10, scale: 0.99 }}
+                transition={{ duration: 0.28, ease:[0.2,0.8,0.2,1] }}
+              >
+                {/* Title row inside the card: combine title + fraction + descriptor and unified disclosure */}
+                <div className="flex items-center justify-between">
+                  <div className="text-[12.5px] font-semibold tracking-[-0.01em]">
+                    Operations <span className="text-white/55">({idx + 1}/{PAGES.length})</span>
+                    <span className="text-white/55"> — {( 
+                      { summary: 'Summary of key operational metrics', incidents: 'Incidents + backlog', performance: 'Latency + throughput', forecast: 'Risk outlook' } as Record<string,string>
+                    )[currentPage.key] || 'Composite view'}</span>
+                  </div>
+                  <Disclosure glossaryKey="ops.summary" placement="top-right" />
+                </div>
+
+                {/* Headline */}
+                <div className="mt-1 text-[20px] leading-6 font-semibold tabular-nums">{currentPage.headline}</div>
+
+                {/* Micro narrative */}
+                <div className="mt-1 text-[11.5px] text-white/75 line-clamp-2">{renderWithAbbr(currentPage.note)}</div>
+
+                {/* Spacer to push indicator to bottom-right */}
+                <div className="mt-auto text-right text-[11px] text-white/55 select-none">{idx + 1} / {PAGES.length}</div>
+              </motion.div>
+            )}
           </AnimatePresence>
         </div>
       </CardWidget>
+      {/* Info tooltip removed in favor of unified Disclosure component */}
+      {/* Sources modal */}
+      {showSources && overlayRef.current && (
+        <AnchoredPopover role="dialog" width={440}>
+          <div role="document">
+            <h3 className="text-sm font-semibold mb-2">Connected sources</h3>
+            <div className="grid grid-cols-2 gap-2 text-[12px] text-white/85">
+              <div>
+                <div className="text-white/60 text-[11px]">ERP</div>
+                <div className="mt-1 flex flex-wrap gap-1.5">{SYSTEMS.erp.map((n,i)=>{
+                  const sel = selectedSource === n;
+                  return (
+                    <span key={i} className={sel ? "px-2 py-1 rounded-lg bg-cyan-400 text-slate-900 border border-transparent" : "px-2 py-1 rounded-lg bg-white/8 border border-white/10"}>{n}</span>
+                  );
+                })}</div>
+              </div>
+              <div>
+                <div className="text-white/60 text-[11px]">CRM</div>
+                <div className="mt-1 flex flex-wrap gap-1.5">{SYSTEMS.crm.map((n,i)=>{
+                  const sel = selectedSource === n;
+                  return (
+                    <span key={i} className={sel ? "px-2 py-1 rounded-lg bg-cyan-400 text-slate-900 border border-transparent" : "px-2 py-1 rounded-lg bg-white/8 border border-white/10"}>{n}</span>
+                  );
+                })}</div>
+              </div>
+              <div>
+                <div className="text-white/60 text-[11px]">ITSM</div>
+                <div className="mt-1 flex flex-wrap gap-1.5">{SYSTEMS.itsm.map((n,i)=>{
+                  const sel = selectedSource === n;
+                  return (
+                    <span key={i} className={sel ? "px-2 py-1 rounded-lg bg-cyan-400 text-slate-900 border border-transparent" : "px-2 py-1 rounded-lg bg-white/8 border border-white/10"}>{n}</span>
+                  );
+                })}</div>
+              </div>
+              <div>
+                <div className="text-white/60 text-[11px]">Projects</div>
+                <div className="mt-1 flex flex-wrap gap-1.5">{SYSTEMS.project.map((n,i)=>{
+                  const sel = selectedSource === n;
+                  return (
+                    <span key={i} className={sel ? "px-2 py-1 rounded-lg bg-cyan-400 text-slate-900 border border-transparent" : "px-2 py-1 rounded-lg bg-white/8 border border-white/10"}>{n}</span>
+                  );
+                })}</div>
+              </div>
+              <div>
+                <div className="text-white/60 text-[11px]">Data</div>
+                <div className="mt-1 flex flex-wrap gap-1.5">{SYSTEMS.data.map((n,i)=>{
+                  const sel = selectedSource === n;
+                  return (
+                    <span key={i} className={sel ? "px-2 py-1 rounded-lg bg-cyan-400 text-slate-900 border border-transparent" : "px-2 py-1 rounded-lg bg-white/8 border border-white/10"}>{n}</span>
+                  );
+                })}</div>
+              </div>
+              <div>
+                <div className="text-white/60 text-[11px]">Docs</div>
+                <div className="mt-1 flex flex-wrap gap-1.5">{SYSTEMS.docs.map((n,i)=>{
+                  const sel = selectedSource === n;
+                  return (
+                    <span key={i} className={sel ? "px-2 py-1 rounded-lg bg-cyan-400 text-slate-900 border border-transparent" : "px-2 py-1 rounded-lg bg-white/8 border border-white/10"}>{n}</span>
+                  );
+                })}</div>
+              </div>
+            </div>
+            <div className="mt-3 flex justify-end">
+              <button onClick={() => setShowSources(false)} className="h-8 px-3 rounded-xl border border-white/12 bg-white/6 hover:bg-white/10 text-[12.5px]">Done</button>
+            </div>
+          </div>
+        </AnchoredPopover>
+      )}
       {/* Hover bubble (book cover), once per session */}
       {showHoverIntro && overlayRef.current && (
         <AnchoredPopover role="status" width={360}>

@@ -6,6 +6,17 @@
 - Status: Redeploy in progress at https://riskill-chat-overlay.windsurf.build/?revx=1. Console must remain clean.
 - Next: After live, run Lighthouse (mobile & desktop) and axe; record results here; fix critical issues; redeploy.
 
+2025-08-11 (Act I inside Operations widget)
+- Added Act I as the first state of `src/widgets/Operations.tsx` using the same `CardWidget` chrome; no cinematic overlay.
+- Compact header merged: `Operations (1/4) — Connected data overview` with small ⓘ info affordance.
+- Replaced CTA buttons with lightweight interactions:
+  - ⓘ hover/tap shows tooltip “View all connected data sources and statuses.” Clicking opens a sources modal.
+  - Integration tags (SAP, Salesforce, ServiceNow, Asana, Snowflake, SharePoint) are clickable to open the same modal; selected tag is highlighted.
+- Sources modal shows ERP/CRM/ITSM/Projects/Data/Docs grid from `SYSTEMS` catalog.
+- Microcopy refinements: `Avg Lat. 230 ms`; forecast note “Next week stable; infra upgrade Tue.”; narrative trims in `operationsNarrative.ts`.
+- Act I auto-dismisses after 5.5s or on first interaction (wheel/scroll), then continues standard rotation.
+- Build: `npm run build` OK (tsc + vite). Ready to redeploy and review.
+
 2025-08-08
 - Completed: Initialized Vite React+TS app; installed framer-motion and @types/node; configured Vite to host localhost:5178 strict.
 - Decisions: Use localhost with strictPort; typography-first cinematic; motion via transform/opacity only.
